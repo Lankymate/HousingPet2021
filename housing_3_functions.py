@@ -33,12 +33,14 @@ import catboost as ctb
 ### Данные
 data_full = pd.read_csv('C:/Users/nicka/OneDrive/Рабочий стол/pet_housing/data_ordered/data3.csv', index_col = 0)
 data_model = data_full.copy()
-data_model = data_model.drop(['id_c', 'living_square', 'ceiling', 'consultant', 'name', 'address', 'description',                                 'street', 'number', 'id_a', ], axis = 1)
+data_model = data_model.drop(['id_c', 'living_square', 'ceiling', 'consultant', 'name', 'address', 'description','street', 'number', 'id_a', ], axis = 1)
 
 data_model['total_log'] = np.log(data_model['total_square'])
 data_model['kitchen_log'] = np.log(data_model['kitchen_square'])
 
-data_model = data_model.loc[:, data_model.columns [list(map(lambda x: x not in ['type', 'rooms', 'toilet', 'view', 'renovation', 'elevator', 'building',                               'overlap', 'parking', 'area'], data_model.columns.tolist()))].tolist() +                 ['type', 'rooms', 'toilet', 'view', 'renovation', 'elevator', 'building', 'overlap', 'parking', 'area']]
+data_model = data_model.loc[:, data_model.columns [list(map(lambda x: x not in ['type', 'rooms', 'toilet', 'view', 'renovation', 'elevator', 'building', 'overlap', \
+                                                                                'parking', 'area'], data_model.columns.tolist()))].tolist() + \
+                            ['type', 'rooms', 'toilet', 'view', 'renovation', 'elevator', 'building', 'overlap', 'parking', 'area']]
 
 global data_train, data_test, predictions, next_preds, predictions_bstr, next_preds_bstr
 data_train, data_test = train_test_split(data_model, test_size = 309, shuffle = True, random_state = 42)
@@ -208,11 +210,14 @@ def processing(scaler, cv, index_train = None, index_test = None, scaling_return
         val['rooms_v3'] = val.rooms
 
         a = [train.loc[train.rooms == j, 'total_square'].mean() for j in ['1', '2', '3', '4', '5']]
-        train.loc[train.rooms.isin(['С', 'К']), 'rooms_v3'] = train.loc[train.rooms.isin(['С', 'К']), :].apply(lambda x: np.argmin([np.abs(x.total_square - a[i]) for i in range(0, 5)]) + 1, axis = 1)
+        train.loc[train.rooms.isin(['С', 'К']), 'rooms_v3'] = train.loc[train.rooms.isin(['С', 'К']), :] \
+        .apply(lambda x: np.argmin([np.abs(x.total_square - a[i]) for i in range(0, 5)]) + 1, axis = 1)
 
-        test.loc[test.rooms.isin(['С', 'К']), 'rooms_v3'] = test.loc[test.rooms.isin(['С', 'К']), :].apply(lambda x: np.argmin([np.abs(x.total_square - a[i]) for i in range(0, 5)]) + 1, axis = 1)
+        test.loc[test.rooms.isin(['С', 'К']), 'rooms_v3'] = test.loc[test.rooms.isin(['С', 'К']), :] \
+        .apply(lambda x: np.argmin([np.abs(x.total_square - a[i]) for i in range(0, 5)]) + 1, axis = 1)
 
-        val.loc[val.rooms.isin(['С', 'К']), 'rooms_v3'] = val.loc[val.rooms.isin(['С', 'К']), :].apply(lambda x: np.argmin([np.abs(x.total_square - a[i]) for i in range(0, 5)]) + 1, axis = 1)
+        val.loc[val.rooms.isin(['С', 'К']), 'rooms_v3'] = val.loc[val.rooms.isin(['С', 'К']), :] \
+        .apply(lambda x: np.argmin([np.abs(x.total_square - a[i]) for i in range(0, 5)]) + 1, axis = 1)
 
         train.rooms_v1 = train.rooms_v1.astype(np.int64)
         test.rooms_v1 = test.rooms_v1.astype(np.int64)
@@ -297,7 +302,8 @@ def processing(scaler, cv, index_train = None, index_test = None, scaling_return
         train['rooms_v3'] = train.rooms
         
         a = [train.loc[train.rooms == j, 'total_square'].mean() for j in ['1', '2', '3', '4', '5']]
-        train.loc[train.rooms.isin(['С', 'К']), 'rooms_v3'] = train.loc[train.rooms.isin(['С', 'К']), :].apply(lambda x: np.argmin([np.abs(x.total_square - a[i]) for i in range(0, 5)]) + 1, axis = 1)
+        train.loc[train.rooms.isin(['С', 'К']), 'rooms_v3'] = train.loc[train.rooms.isin(['С', 'К']), :] \
+        .apply(lambda x: np.argmin([np.abs(x.total_square - a[i]) for i in range(0, 5)]) + 1, axis = 1)
         
         train.rooms_v1 = train.rooms_v1.astype(np.int64)
         train.rooms_v2 = train.rooms_v2.astype(np.int64)
@@ -319,7 +325,8 @@ def processing(scaler, cv, index_train = None, index_test = None, scaling_return
 
 
         
-### №3 Функция для обучения линейных моделей , при кросс-валидации  возвращает табоицу с результатами, при обучении на всем сете - пандас серию с результатами для лучшего шага отбора признаков
+### №3 Функция для обучения линейных моделей , при кросс-валидации  возвращает табоицу с результатами, при обучении на всем сете - пандас серию с результатами \
+### для лучшего шага отбора признаков
 def linear_model(model, alpha = 0.001, l1_ratio = 0.5, max_features = 93, cv = True, iters = None, scaler = None,
                  normalizing = False, verbose = True): 
     '''
@@ -519,7 +526,8 @@ def linear_model(model, alpha = 0.001, l1_ratio = 0.5, max_features = 93, cv = T
 
     
     
-### №4 Функция для обучения лесов Функция для обучения линейных моделей , при кросс-валидации  возвращает табоицу с результатами, при обучении на всем сете - пандас серию с результатами для лучшего шага отбора признаков
+### №4 Функция для обучения лесов Функция для обучения линейных моделей , при кросс-валидации  возвращает табоицу с результатами, при обучении на всем сете - пандас \
+### серию с результатами для лучшего шага отбора признаков
 def forest_model(n_estimators = 100,
                  max_depth = None,
                  min_samples_split = 2,
@@ -655,7 +663,9 @@ def forest_model(n_estimators = 100,
             step += 1 # Переходим к следующему шагу кросс-валидации
         results.at[e, 'features'] = np.array(X_train.columns) # Запоминаем имена признаков
         # Находим средние важности по фолдам
-        results.loc[e, 'feat_imps_mean'] = (results.loc[e, 'feat_imps0'] + results.loc[e, 'feat_imps1'] + results.loc[e, 'feat_imps2'] + results.loc[e, 'feat_imps3'] + results.loc[e, 'feat_imps4'] + results.loc[e, 'feat_imps5'] + results.loc[e, 'feat_imps6'] + results.loc[e, 'feat_imps7'] + results.loc[e, 'feat_imps8'] + results.loc[e, 'feat_imps9'])/10
+        results.loc[e, 'feat_imps_mean'] = (results.loc[e, 'feat_imps0'] + results.loc[e, 'feat_imps1'] + results.loc[e, 'feat_imps2'] + results.loc[e, 'feat_imps3'] + \
+                                            results.loc[e, 'feat_imps4'] + results.loc[e, 'feat_imps5'] + results.loc[e, 'feat_imps6'] + results.loc[e, 'feat_imps7'] + \
+                                            results.loc[e, 'feat_imps8'] + results.loc[e, 'feat_imps9'])/10
         # Оставляем только фичи, средняя важность для которых выше определенного порога
         chosen_feats = results.features[e][results.feat_imps_mean[e] >= threshold]
         if verbose == True: # Оповещаем о переходе к следующему шагу алгоритма
@@ -663,7 +673,8 @@ def forest_model(n_estimators = 100,
         e += 1 # Переходим к следующему шагу отбора признаков
         if len(chosen_feats) == shape_stopper: # Заканчиваем оптимизировать, если не отобралось новое число фичей
             break
-    results[['n_estimators', 'max_depth', 'min_samples_split', 'min_samples_leaf', 'max_features', 'max_leaf_nodes', 'bootstrap', 'max_samples', 'threshold']] = [n_estimators, max_depth, min_samples_split, min_samples_leaf, max_features, max_leaf_nodes, bootstrap, max_samples, threshold]
+    results[['n_estimators', 'max_depth', 'min_samples_split', 'min_samples_leaf', 'max_features', 'max_leaf_nodes', 'bootstrap', 'max_samples', 'threshold']] = \
+    [n_estimators, max_depth, min_samples_split, min_samples_leaf, max_features, max_leaf_nodes, bootstrap, max_samples, threshold]
     
     results['mean_mse'] = results.apply(lambda x: np.mean([x[f'mse{i}'] for i in range(10)]), axis = 1)
     results['mean_mse_test'] = results.apply(lambda x: np.mean([x[f'mse_test{i}'] for i in range(10)]), axis = 1)
@@ -694,7 +705,8 @@ def forest_model(n_estimators = 100,
 
 
 
-### № 5 Функция для обучения бустинговФункция для обучения линейных моделей , при кросс-валидации  возвращает табоицу с результатами, при обучении на всем сете - пандас серию с результатами для лучшего шага отбора признаков
+### № 5 Функция для обучения бустинговФункция для обучения линейных моделей , при кросс-валидации  возвращает табоицу с результатами, при обучении на всем сете - пандас \
+### серию с результатами для лучшего шага отбора признаков
 def boosting_model(iterations = None,
                    depth = None,
                    learning_rate = None,
@@ -825,7 +837,9 @@ def boosting_model(iterations = None,
         # Запоминаем имена признаков
         results.at[e, 'features'] = bstr.feature_names_ 
         # Находим средние важности по фолдам
-        results.loc[e, 'feat_imps_mean'] = (results.loc[e, 'feat_imps0'] + results.loc[e, 'feat_imps1'] + results.loc[e, 'feat_imps2'] + results.loc[e, 'feat_imps3'] + results.loc[e, 'feat_imps4'] + results.loc[e, 'feat_imps5'] + results.loc[e, 'feat_imps6'] + results.loc[e, 'feat_imps7'] + results.loc[e, 'feat_imps8'] + results.loc[e, 'feat_imps9'])/10
+        results.loc[e, 'feat_imps_mean'] = (results.loc[e, 'feat_imps0'] + results.loc[e, 'feat_imps1'] + results.loc[e, 'feat_imps2'] + results.loc[e, 'feat_imps3'] + \
+                                            results.loc[e, 'feat_imps4'] + results.loc[e, 'feat_imps5'] + results.loc[e, 'feat_imps6'] + results.loc[e, 'feat_imps7'] + \
+                                            results.loc[e, 'feat_imps8'] + results.loc[e, 'feat_imps9'])/10
         # Оставляем только фичи, средняя важность для которых выше определенного порога
         chosen_feats = np.array(results.features[e])[results.feat_imps_mean[e] >= threshold]
         if verbose == True: # Оповещаем о переходе к следующему шагу алгоритма
@@ -833,7 +847,8 @@ def boosting_model(iterations = None,
         e += 1 # Переходим к следующему шагу отбора признаков
         if len(chosen_feats) == shape_stopper: # Заканчиваем оптимизировать, если не отобралось новое число фичей
             break
-    results[['iterations', 'depth', 'learning_rate', 'random_strength', 'bagging_temperature', 'border_count', 'l2_leaf_reg', 'grow_policy', 'threshold']] = [iterations, depth, learning_rate, random_strength, bagging_temperature, border_count, l2_leaf_reg, grow_policy, threshold]
+    results[['iterations', 'depth', 'learning_rate', 'random_strength', 'bagging_temperature', 'border_count', 'l2_leaf_reg', 'grow_policy', 'threshold']] = \
+    [iterations, depth, learning_rate, random_strength, bagging_temperature, border_count, l2_leaf_reg, grow_policy, threshold]
     
     results['mean_mse'] = results.apply(lambda x: np.mean([x[f'mse{i}'] for i in range(10)]), axis = 1)
     results['mean_mse_test'] = results.apply(lambda x: np.mean([x[f'mse_test{i}'] for i in range(10)]), axis = 1)
